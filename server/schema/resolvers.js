@@ -5,9 +5,11 @@ const { update } = require('lodash');
 const resolvers = {
   Query: {
     users: (parent, args, context, info) => {
-      console.log(context.req.headers);
+      if (UserList) return { users: UserList };
+      // console.log(context.req.headers);
       // console.log(info);
-      return UserList;
+
+      return { message: 'Yo, there was an error' }
     },
     user: (parent, args, context, info) => {
       const id = Number(args.id);
@@ -22,6 +24,7 @@ const resolvers = {
       return _.find(MovieList, { name });
     },
   },
+
   User: {
     favoriteMovies: (parent, args) => {
       const movieNames = parent.favoriteMovies;
@@ -35,6 +38,7 @@ const resolvers = {
       return res;
     },
   },
+
   Mutation: {
     createUser: (parent, args) => {
       const user = args.input;
@@ -62,6 +66,16 @@ const resolvers = {
       const id = args.id;
       _.remove(UserList, (user) => user.id === Number(id));
       return null;
+    }
+  },
+
+  UsersResult: {
+    __resolveType(obj) {
+      if (obj.users) return 'UsersSuccessfulResult'; // success
+
+      if (obj.message) return 'UsersErrorResult'; // querying error
+
+      return null; // graphql error
     }
   }
 };
