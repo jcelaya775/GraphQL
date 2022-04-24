@@ -4,11 +4,18 @@ import { useQuery, useLazyQuery, useMutation, gql } from '@apollo/client'
 const QUERY_ALL_USERS = gql`
   query GetAllUsers {
     users {
-      id
-      name
-      age
-      username
-      nationality
+      ... on UsersSuccessfulResult {
+        users {
+          name
+          age
+          nationality
+          username
+        }
+      }
+
+      ... on UsersErrorResult {
+        message
+      }
     }
   }
 `
@@ -68,7 +75,7 @@ export default function DisplayData() {
   if (error) {
     console.log(error)
   }
-  data && console.log(data)
+  data && console.log(data.user)
 
   moviesData && console.log(moviesData)
 
@@ -119,8 +126,8 @@ export default function DisplayData() {
           Create User
         </button>
       </div>
-      {data &&
-        data.users.map((user, key) => {
+      {data.users &&
+        data.users.users.map((user, key) => {
           return (
             <div key={key}>
               <h1>Name: {user.name}</h1>
